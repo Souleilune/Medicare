@@ -56,6 +56,6 @@ if ($user['role'] === 'Admin') {
 } elseif ($user['role'] === 'Specialist') {
   header("Location: specialist_dashboard.php");
 } else {
-  header("Location: index.php");
+  header("Location: dashboard.php");
 }
 exit;
