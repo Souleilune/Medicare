@@ -10,248 +10,395 @@ if (session_status() === PHP_SESSION_NONE) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register | MindCare</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    /* 🌿 Base layout */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      min-height: 100vh;
-      transition: background-color 0.5s ease, color 0.5s ease;
-      color: #1e1e1e;
-      background-color: #f8f9fa;
+    /* Poppins font for consistency */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    :root{
+      --teal-1: #5ad0be;
+      --teal-2: #1aa592;
+      --teal-3: #0a6a74;
+      --line: #e9edf5;
+      --field-bg: #f6f7fb;
+      --field-text: #2b2f38;
+      --muted: #7a828e;
+      --btn-from: #38c7a3;
+      --btn-to: #2fb29c;
     }
 
-    /* 🌿 Sidebar (same as FAQ) */
-    .sidebar {
-      width: 250px;
-      background: linear-gradient(to bottom right, #d0f0c0, #a8e6cf);
-      padding: 1.5rem;
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--field-text);
+      min-height: 100vh;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    /* Split layout */
+    .register-page {
+      min-height: 100vh;
+      overflow: hidden;
+      background: #fff;
+    }
+    .register-page .row {
+      min-height: 100vh;
+    }
+
+    /* Left panel (Logo + Pre-Assessment) - matching login.php */
+    .info-side {
+      position: relative;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.5s ease, color 0.5s ease;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      padding: 0 72px;
+      color: #fff;
+      background:
+        radial-gradient(900px 500px at -10% 115%, rgba(255,255,255,.15) 0%, transparent 60%),
+        linear-gradient(135deg, var(--teal-1) 0%, var(--teal-2) 48%, var(--teal-3) 100%);
+      border-right: 1px solid var(--line);
+      overflow: hidden;
     }
 
-    .logo-wrapper img {
-      width: 120px;
-      margin-bottom: 1rem;
+    /* Rounded ornament arcs */
+    .info-side::before,
+    .info-side::after {
+      content: '';
+      position: absolute;
+      bottom: -180px;
+      left: -180px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.25);
+      pointer-events: none;
+    }
+    .info-side::before {
+      width: 520px; 
+      height: 520px;
+    }
+    .info-side::after {
+      width: 700px; 
+      height: 700px;
+      border-color: rgba(255,255,255,.15);
     }
 
-    .nav-link {
-      text-decoration: none;
-      color: #1e1e1e;
-      font-weight: 500;
-      margin: 0.5rem 0;
-      display: block;
-      transition: color 0.3s ease;
+    /* Logo and copy */
+    .info-side img {
+      height: 140px;
+      width: auto;
+      margin: 0 0 24px 0;
     }
-
-    .nav-link:hover {
-      color: #388e3c;
-    }
-
-    body.dark-mode .sidebar {
-      background: linear-gradient(to bottom right, #2e7d32, #1b5e20);
-    }
-
-    body.dark-mode .nav-link {
-      color: #f8f9fa;
-    }
-
-    body.dark-mode .nav-link:hover {
-      color: #c8e6c9;
-    }
-
-    .nav-link.text-danger {
-      color: #d32f2f !important;
-    }
-
-    /* 🌗 Theme Toggle */
-    #themeToggle {
-      margin-top: auto;
-      background-color: transparent;
-      border: 2px solid #4caf50;
-      color: #4caf50;
-      border-radius: 25px;
-      padding: 6px 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.3s ease;
-    }
-
-    #themeToggle:hover {
-      background-color: #4caf50;
+    .info-side h4 {
+      font-size: 40px;
+      line-height: 1.1;
+      font-weight: 700;
+      margin: 8px 0 10px;
       color: #fff;
     }
-
-    .rotate {
-      transform: rotate(360deg);
-      transition: transform 0.5s ease;
+    .info-side p {
+      font-size: 16px;
+      color: rgba(255,255,255,.9);
+      margin-bottom: 18px;
+    }
+    .info-side .text-muted {
+      color: rgba(255,255,255,.85) !important;
+      font-weight: 500;
     }
 
-    /* 🌸 Main content area */
-    .main-content {
-      flex-grow: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: background-color 0.5s ease, color 0.5s ease;
-      background-color: #ffffff;
-    }
-
-    body.dark-mode .main-content {
-      background-color: #121212;
-      color: #f8f9fa;
-    }
-
-    /* Card form */
-    .card {
-      width: 100%;
-      max-width: 480px;
-      background-color: rgba(255, 255, 255, 0.95);
-      border-radius: 1rem;
-      padding: 2rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    body.dark-mode .card {
-      background-color: rgba(30, 30, 30, 0.95);
-      color: #f8f9fa;
-    }
-
-    /* Inputs and selects */
-    .form-control, .form-select {
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background-color: #fff;
-      color: #1e1e1e;
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    }
-
-    .form-control:focus, .form-select:focus {
-      border-color: #4caf50;
-      box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
-    }
-
-    body.dark-mode .form-control,
-    body.dark-mode .form-select {
-      background-color: #2c2c2c;
-      color: #f8f9fa;
-      border-color: #81c784;
-    }
-
-    body.dark-mode .form-control::placeholder {
-      color: #bdbdbd;
-    }
-
-    /* Button */
-    .btn-primary {
-      background-color: #4caf50;
+    /* CTA button */
+    .info-side a.btn-outline-primary {
+      background: rgba(255,255,255,.20);
+      color: #fff;
       border: none;
-      transition: background-color 0.3s;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+      transition: transform .15s ease, background .2s ease;
+    }
+    .info-side a.btn-outline-primary:hover {
+      background: rgba(255,255,255,.28);
+      transform: translateY(-1px);
     }
 
-    .btn-primary:hover {
-      background-color: #45a049;
+    /* Right panel (Register form) */
+    .register-form-side {
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
     }
 
-    body.dark-mode .btn-primary {
-      background-color: #81c784;
-      color: #1e1e1e;
+    .register-container {
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      width: 380px;
+      max-width: 90%;
+      padding: 0;
+      text-align: left;
+    }
+
+    /* Titles */
+    .register-container h3 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--field-text);
+      margin-bottom: 6px;
+    }
+    .register-container .subtitle,
+    .register-container small {
+      color: var(--muted);
+    }
+
+    /* Alerts */
+    .register-container .alert {
+      border: none;
+      border-radius: 10px;
+      background: #ffe6e8;
+      color: #9b1c1f;
+      margin-bottom: 20px;
+    }
+    .register-container .alert-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    /* Input fields with icons */
+    .register-container input[type="text"],
+    .register-container input[type="email"],
+    .register-container input[type="password"],
+    .register-container select {
+      background-color: var(--field-bg);
+      border: none;
+      height: 52px;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 15px;
+      color: var(--field-text);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 8px 24px rgba(18,38,63,0.03);
+      transition: box-shadow .2s ease, background-color .2s ease;
+    }
+
+    /* Icons via padding */
+    .register-container input.fullname-input { padding-left: 52px; }
+    .register-container input[type="email"] { padding-left: 52px; }
+    .register-container select { padding-left: 52px; }
+    .password-wrapper input[type="password"],
+    .password-wrapper input[type="text"] { 
+      padding-left: 52px; 
+      padding-right: 48px; 
+    }
+
+    /* Icon backgrounds using inline SVG */
+    .register-container input.fullname-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2399A3AE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 18px 50%;
+    }
+
+    .register-container input[type="email"]{
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2399A3AE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2' ry='2'/%3E%3Cpolyline points='22,7 12,13 2,7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 18px 50%;
+    }
+
+    .register-container select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2399A3AE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 18px 50%;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    /* Password inputs should NOT have background images - icon comes from ::before pseudo-element */
+    .password-wrapper input[type="password"],
+    .password-wrapper input[type="text"] {
+      background-image: none !important;
+    }
+
+    /* Password icon wrapper */
+    .password-wrapper { 
+      position: relative; 
+    }
+    .password-wrapper::before{
+      content: "\f023";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 16px;
+      color: #99A3AE;
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Show/Hide toggle icon */
+    .toggle-password {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #99A3AE;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    /* Focus states */
+    .register-container input:focus,
+    .register-container select:focus {
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(56,199,163,0.18);
+      outline: none;
+    }
+
+    /* Register button with gradient */
+    .register-container button,
+    .register-container .btn-primary {
+      background: linear-gradient(135deg, var(--btn-from) 0%, var(--btn-to) 100%);
+      border: none;
+      height: 56px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: .2px;
+      color: #fff;
+      width: 100%;
+      box-shadow: 0 10px 24px rgba(48,170,153,.35);
+      transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    .register-container button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(48,170,153,.42);
+    }
+
+    /* Link styles */
+    .register-container a {
+      color: #7c8a99;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .register-container a:hover { 
+      color: #5d6a78; 
+      text-decoration: underline; 
+    }
+    .register-container a.text-primary {
+      color: var(--teal-2) !important;
+      font-weight: 600;
+    }
+
+    /* Fade animation */
+    .fade-in {
+      animation: fadeInUp .9s ease both;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 992px) {
+      .info-side { padding: 48px 40px; }
+      .info-side img { height: 110px; }
+    }
+    @media (max-width: 768px) {
+      .info-side {
+        min-height: 44vh;
+        border-right: none;
+        padding: 40px 24px;
+      }
+      .register-form-side {
+        min-height: 56vh;
+        padding: 24px;
+      }
+      .register-container { width: 100%; max-width: 440px; }
     }
   </style>
 </head>
-<body>
 
-  <!-- 🌿 Sidebar (same as FAQ) -->
-  <div class="sidebar">
-    <div class="text-center">
-      <div class="logo-wrapper">
-        <img src="images/MindCare.png" alt="MindCare Logo">
+<body class="register-page">
+  <div class="container-fluid p-0">
+    <div class="row g-0 min-vh-100">
+
+      <!-- Left Side: Logo + Pre-Assessment -->
+      <div class="col-md-6 info-side">
+        <img src="images/MindCare.png" alt="MindCare Logo" class="img-fluid" />
+        <h4>Join MindCare</h4>
+        <p class="text-muted fst-italic">Start your mental wellness journey today.</p>
+        <p>Already have an account?</p>
+        <a href="login.php" class="btn btn-outline-primary">Sign In Here</a>
       </div>
-      <nav class="nav flex-column text-center">
-        <a class="nav-link" href="assessment.php">Assessment</a>
-        <a class="nav-link" href="recommendations.php">Recommendations</a>
-        <a class="nav-link" href="book_appointment.php">Book Appointment</a>
-        <a class="nav-link" href="appointments.php">My Appointments</a>
-        <a class="nav-link" href="profile.php">Profile</a>
-        <a class="nav-link" href="faq.php">FAQ</a>
-        <a class="nav-link text-danger fw-bold" href="logout.php">Logout</a>
-      </nav>
-    </div>
 
-    <button id="themeToggle">
-      <span id="themeIcon">🌞</span>
-      <span id="themeLabel">Light Mode</span>
-    </button>
-  </div>
+      <!-- Right Side: Register Form -->
+      <div class="col-md-6 register-form-side">
+        <div class="register-container fade-in">
+          <h3 class="mb-1">Create Account</h3>
+          <small class="text-muted d-block mb-4">Please fill in your details</small>
 
-  <!-- 🌸 Main Form Section -->
-  <div class="main-content">
-    <div class="card">
-      <h2 class="text-center mb-3">Create an Account</h2>
+          <?php if (isset($_GET['error'])): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
+          <?php elseif (isset($_GET['success'])): ?>
+            <div class="alert alert-success">
+              Registration successful! You can now <a href="login.php" class="text-primary fw-semibold">log in</a>.
+            </div>
+          <?php endif; ?>
 
-      <?php if (isset($_GET['error'])): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
-      <?php elseif (isset($_GET['success'])): ?>
-        <div class="alert alert-success">Registration successful! You can now <a href="login.php">log in</a>.</div>
-      <?php endif; ?>
+          <form method="POST" action="register-handler.php">
+            <div class="mb-3">
+              <input type="text" name="fullname" class="form-control fullname-input" placeholder="Full Name" required />
+            </div>
 
-      <form method="POST" action="register-handler.php">
-        <div class="mb-3">
-          <label for="fullname" class="form-label">Full Name</label>
-          <input type="text" name="fullname" class="form-control" required />
+            <div class="mb-3">
+              <input type="email" name="email" class="form-control" placeholder="Email Address" required />
+            </div>
+
+            <div class="mb-3 password-wrapper">
+              <input type="password" name="password" id="password" class="form-control" placeholder="Password" required />
+              <span class="toggle-password" onclick="togglePassword()">
+                <i id="toggleIcon" class="fa-solid fa-eye"></i>
+              </span>
+            </div>
+
+            <div class="mb-3">
+              <select name="gender" class="form-select" required>
+                <option value="" disabled selected>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Create Account</button>
+          </form>
+
+          <div class="mt-3 text-center">
+            <small>Already have an account?</small>
+            <a href="login.php" class="text-primary fw-semibold small">Sign in!</a>
+          </div>
         </div>
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" required />
-        </div>
-        <div class="mb-3">
-          <label for="password" class="form-label">Password</label>
-          <input type="password" name="password" class="form-control" required />
-        </div>
-        <div class="mb-3">
-          <label for="gender" class="form-label">Gender</label>
-          <select name="gender" class="form-select" required>
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Register</button>
-      </form>
+      </div>
+
     </div>
   </div>
 
-  <!-- 🌙 Dark Mode Toggle Script -->
   <script>
-    const toggleBtn = document.getElementById('themeToggle');
-    const icon = document.getElementById('themeIcon');
-    const label = document.getElementById('themeLabel');
-
-    const prefersDark = localStorage.getItem('dark-mode') === 'true';
-    if (prefersDark) {
-      document.body.classList.add('dark-mode');
-      icon.textContent = '🌙';
-      label.textContent = 'Dark Mode';
+    function togglePassword() {
+      const passwordField = document.getElementById("password");
+      const toggleIcon = document.getElementById("toggleIcon");
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleIcon.classList.remove("fa-eye");
+        toggleIcon.classList.add("fa-eye-slash");
+      } else {
+        passwordField.type = "password";
+        toggleIcon.classList.remove("fa-eye-slash");
+        toggleIcon.classList.add("fa-eye");
+      }
     }
-
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('dark-mode', isDark);
-      icon.classList.add('rotate');
-      setTimeout(() => icon.classList.remove('rotate'), 500);
-      icon.textContent = isDark ? '🌙' : '🌞';
-      label.textContent = isDark ? 'Dark Mode' : 'Light Mode';
-    });
   </script>
 </body>
 </html>

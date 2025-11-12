@@ -160,7 +160,8 @@ body {
 
 /* Input fields – rounded with icons */
 .login-container input[type="email"],
-.login-container input[type="password"] {
+.login-container input[type="password"],
+.login-container input[type="text"] {
   background-color: var(--field-bg);
   border: none;
   height: 52px;
@@ -174,7 +175,11 @@ body {
 
 /* Left padding to make room for icons */
 .login-container input[type="email"] { padding-left: 52px; }
-.password-wrapper input[type="password"] { padding-left: 52px; padding-right: 48px; }
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] { 
+  padding-left: 52px; 
+  padding-right: 48px; 
+}
 
 /* Email icon via inline SVG background (no HTML change needed) */
 .login-container input[type="email"]{
@@ -195,6 +200,8 @@ body {
   left: 18px;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* Show/Hide toggle icon */
@@ -205,6 +212,7 @@ body {
   transform: translateY(-50%);
   color: #99A3AE;
   cursor: pointer;
+  z-index: 2;
 }
 
 /* Focus states */
