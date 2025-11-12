@@ -2,256 +2,429 @@
 session_start();
 include 'supabase.php';
 
-// ✅ Prevent undefined session error
 $user_id = $_SESSION['user']['id'] ?? '';
+$user_name = $_SESSION['user']['fullname'] ?? 'User';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Take Assessment</title>
+  <title>Mental Health Assessment - MindCare</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-teal: #5ad0be;
+      --primary-teal-dark: #1aa592;
+      --text-dark: #2b2f38;
+      --text-muted: #7a828e;
+      --bg-light: #f8f9fa;
+      --sidebar-bg: #f5f6f7;
+      --card-bg: #ffffff;
+      --border-color: #e9edf5;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f9fa;
-      transition: background-color 0.3s, color 0.3s;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      overflow-x: hidden;
     }
 
-    body.dark-mode {
-      background-color: #121212;
-      color: #f1f1f1;
-    }
-
+    /* Sidebar */
     .sidebar {
-      width: 260px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      padding: 1.5rem;
+      z-index: 1000;
+    }
+
+    .sidebar .logo-wrapper {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar .logo-img {
+      max-width: 100px;
+    }
+
+    .sidebar .nav-link {
+      color: #2b2f38;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      font-size: 0.625rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: rgba(90, 208, 190, 0.1);
+      color: #5ad0be;
+    }
+
+    .sidebar .nav-link.active {
+      background-color: #5ad0be;
+      color: #ffffff;
+    }
+
+    /* Main Content Area - THIS IS KEY */
+    .main-wrapper {
+      margin-left: 250px;
+      padding: 2rem;
+      width: calc(100% - 250px);
       min-height: 100vh;
-      background-color: #198754;
-      color: white;
     }
 
-    .nav-link {
-      padding: 0.6rem;
-      transition: background-color 0.3s;
-    }
-
-    .nav-link:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    #themeToggle {
-      margin-top: 1rem;
+    .content-inner {
+      max-width: 100%;
       width: 100%;
     }
 
-    .accordion-button:not(.collapsed) {
-      background-color: #d1e7dd;
-      color: #0f5132;
+    /* Header */
+    .page-header {
+      margin-bottom: 2rem;
     }
 
-    body.dark-mode .accordion-button:not(.collapsed) {
-      background-color: #14532d;
-      color: #fff;
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header h1 .user-name {
+      color: var(--primary-teal);
+    }
+
+    .page-header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Section Box */
+    .section-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin: 0 0 2rem 0;
+    }
+
+    /* Question */
+    .question-item {
+      margin-bottom: 2rem;
+    }
+
+    .question-item label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .question-item label .num {
+      color: var(--primary-teal);
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+
+    .question-item input,
+    .question-item select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: var(--bg-light);
+      transition: all 0.3s ease;
+    }
+
+    .question-item input:focus,
+    .question-item select:focus {
+      outline: none;
+      border-color: var(--primary-teal);
+      box-shadow: 0 0 0 3px rgba(90, 208, 190, 0.1);
+      background: #fff;
+    }
+
+    /* Submit Button */
+    .submit-area {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-teal-dark) 100%);
+      color: #ffffff;
+      border: none;
+      padding: 0.875rem 3rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(90, 208, 190, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(90, 208, 190, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+        padding: 1.5rem;
+      }
+
+      .section-box {
+        padding: 1.5rem;
+      }
     }
   </style>
 </head>
-
 <body>
-  <div class="d-flex">
-    <!-- ✅ Sidebar -->
-    <div id="sidebar" class="sidebar d-flex flex-column align-items-center p-3">
-      <div class="logo-wrapper mb-3">
-        <img src="images/MindCare.png" alt="MindCare Logo" class="logo-img" style="max-width: 120px;" />
-      </div>
 
-      <div class="dropdown w-100 mb-3">
-        <button class="btn btn-outline-light dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          Resources
-        </button>
-        <ul class="dropdown-menu w-100">
-          <li><h6 class="dropdown-header">Services</h6></li>
-          <li><span class="dropdown-item-text">Mental Health Assessments</span></li>
-          <li><span class="dropdown-item-text">Personalized Recommendations</span></li>
-          <li><span class="dropdown-item-text">Appointment Booking</span></li>
-          <li><span class="dropdown-item-text">Progress Tracking Dashboard</span></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><h6 class="dropdown-header">Therapies</h6></li>
-          <li><span class="dropdown-item-text">Cognitive Behavioral Therapy</span></li>
-          <li><span class="dropdown-item-text">Mindfulness-Based Therapy</span></li>
-          <li><span class="dropdown-item-text">Interpersonal Therapy</span></li>
-          <li><span class="dropdown-item-text">Supportive Counseling</span></li>
-        </ul>
-      </div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo-wrapper">
+      <img src="images/MindCare.png" alt="MindCare Logo" class="logo-img" />
+    </div>
 
-      <nav class="nav flex-column w-100 text-center">
-        <a class="nav-link text-white fw-bold" href="assessment.php">Assessment</a>
-        <a class="nav-link text-white" href="recommendations.php">Recommendations</a>
-        <a class="nav-link text-white" href="book_appointment.php">Book Appointment</a>
-        <a class="nav-link text-white" href="appointments.php">My Appointments</a>
-        <a class="nav-link text-white" href="profile.php">Profile</a>
-        <a class="nav-link text-white" href="faq.php">FAQ</a>
-        <a class="nav-link text-danger fw-bold" href="logout.php">Logout</a>
-      </nav>
-
-      <button id="themeToggle" class="btn btn-outline-light d-flex align-items-center gap-2 mt-4">
-  <span id="themeIcon">🌞</span>
-  <span id="themeLabel">Light Mode</span>
-</button>
+    <nav class="nav flex-column">
+      <a class="nav-link" href="dashboard.php">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        DASHBOARD
+      </a>
+      <a class="nav-link active" href="assessment.php">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        ASSESSMENT
+      </a>
+      <a class="nav-link" href="book_appointment.php">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        BOOK APPOINTMENT
+      </a>
+      <a class="nav-link" href="appointments.php">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        MY APPOINTMENTS
+      </a>
+      <a class="nav-link" href="profile.php">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        PROFILE
+      </a>
+      <a class="nav-link" href="faq.php">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        FAQS
+      </a>
+    </nav>
   </div>
 
-    <!-- ✅ Main Content -->
-    <div class="flex-grow-1 p-4">
-      <h3 class="mb-4">Mental Health & Self-Awareness Assessment</h3>
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <div class="content-inner">
+      
+      <!-- Header -->
+      <div class="page-header">
+        <h1>Hello, <span class="user-name"><?= htmlspecialchars($user_name) ?></span>!</h1>
+        <p class="subtitle">Let's do a Mental Health and Self-Awareness Assessment!</p>
+      </div>
 
+      <!-- Form -->
       <form method="POST" action="save_assessment.php">
         <input type="hidden" name="user_id" value="<?= htmlspecialchars($user_id) ?>">
 
-        <div class="accordion" id="assessmentAccordion">
-
-          <!-- ✅ Section 1 -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#sectionOne">
-                Orientation and Awareness
-              </button>
-            </h2>
-            <div id="sectionOne" class="accordion-collapse collapse show" data-bs-parent="#assessmentAccordion">
-              <div class="accordion-body">
-                <input type="text" name="orientation_0" class="form-control mb-2" placeholder="Your full name" required>
-                <input type="text" name="orientation_1" class="form-control mb-2" placeholder="Where are you right now?" required>
-                <input type="text" name="orientation_2" class="form-control mb-2" placeholder="What time is it?" required>
-                <input type="text" name="orientation_3" class="form-control mb-2" placeholder="Today's date or approximate date" required>
-                <input type="text" name="orientation_4" class="form-control mb-2" placeholder="What brought you here today?" required>
-              </div>
-            </div>
+        <!-- Section 1 -->
+        <div class="section-box">
+          <h5 class="section-title">Orientation and Awareness</h5>
+          
+          <div class="question-item">
+            <label><span class="num">1.</span> Your Full Name</label>
+            <input type="text" name="orientation_0" placeholder="Enter your full name" required>
           </div>
 
-          <!-- ✅ Section 2 -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingTwo">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sectionTwo">
-                Emotional Well-Being
-              </button>
-            </h2>
-            <div id="sectionTwo" class="accordion-collapse collapse" data-bs-parent="#assessmentAccordion">
-              <div class="accordion-body">
-                <input type="text" name="emotions_0" class="form-control mb-2" placeholder="Describe your mood right now" required>
-                <input type="text" name="emotions_1" class="form-control mb-2" placeholder="Most common feelings this week" required>
-                <input type="text" name="emotions_2" class="form-control mb-2" placeholder="Something worrying or upsetting you" required>
-                <input type="text" name="emotions_3" class="form-control mb-2" placeholder="When do you feel calm or anxious?" required>
-                <input type="text" name="emotions_4" class="form-control mb-2" placeholder="Do you feel supported?" required>
-              </div>
-            </div>
+          <div class="question-item">
+            <label><span class="num">2.</span> Where are you right now?</label>
+            <input type="text" name="orientation_1" placeholder="Your current location" required>
           </div>
 
-          <!-- ✅ Section 3 -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingThree">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sectionThree">
-                Memory and Concentration
-              </button>
-            </h2>
-            <div id="sectionThree" class="accordion-collapse collapse" data-bs-parent="#assessmentAccordion">
-              <div class="accordion-body">
-                <input type="text" name="memory_initial" class="form-control mb-2" placeholder="Repeat: Leaf – Phone – Chair" required>
-                <input type="text" name="memory_recall" class="form-control mb-2" placeholder="Recall the three words after 5 minutes" required>
-              </div>
-            </div>
+          <div class="question-item">
+            <label><span class="num">3.</span> What time is it?</label>
+            <input type="text" name="orientation_2" placeholder="Current time" required>
           </div>
 
-          <!-- ✅ Section 4 -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingFour">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sectionFour">
-                Thought and Perception
-              </button>
-            </h2>
-            <div id="sectionFour" class="accordion-collapse collapse" data-bs-parent="#assessmentAccordion">
-              <div class="accordion-body">
-                <input type="text" name="thoughts_0" class="form-control mb-2" placeholder="Disturbing or hard-to-control thoughts?" required>
-                <input type="text" name="thoughts_1" class="form-control mb-2" placeholder="Feeling others are against you?" required>
-                <input type="text" name="thoughts_2" class="form-control mb-2" placeholder="Hearing or seeing things others don’t?" required>
-                <input type="text" name="thoughts_3" class="form-control mb-2" placeholder="Feeling disconnected from others?" required>
-              </div>
-            </div>
+          <div class="question-item">
+            <label><span class="num">4.</span> Today's date or approximate date</label>
+            <input type="text" name="orientation_3" placeholder="Today's date" required>
           </div>
 
-          <!-- ✅ Section 5 -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingFive">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sectionFive">
-                Decision-Making and Insight
-              </button>
-            </h2>
-            <div id="sectionFive" class="accordion-collapse collapse" data-bs-parent="#assessmentAccordion">
-              <div class="accordion-body">
-                <input type="text" name="decisions_0" class="form-control mb-2" placeholder="How would you help a crying friend?" required>
-                <input type="text" name="decisions_1" class="form-control mb-2" placeholder="What does mental health care mean to you?" required>
-                <input type="text" name="decisions_2" class="form-control mb-2" placeholder="Are you ready to make changes?" required>
-              </div>
-            </div>
-          </div>
-
-          <!-- ✅ Section 6 -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingSix">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sectionSix">
-                Core Assessment
-              </button>
-            </h2>
-            <div id="sectionSix" class="accordion-collapse collapse" data-bs-parent="#assessmentAccordion">
-              <div class="accordion-body">
-                <label>How often have you felt anxious this week?</label>
-                <select name="q1" class="form-select mb-3">
-                  <option value="0">Not at all</option>
-                  <option value="1">Several days</option>
-                  <option value="2">More than half the days</option>
-                  <option value="3">Nearly every day</option>
-                </select>
-
-                <label>How often have you felt down or depressed?</label>
-                <select name="q2" class="form-select mb-3">
-                  <option value="0">Not at all</option>
-                  <option value="1">Several days</option>
-                  <option value="2">More than half the days</option>
-                  <option value="3">Nearly every day</option>
-                </select>
-              </div>
-            </div>
+          <div class="question-item">
+            <label><span class="num">5.</span> What brought you here today?</label>
+            <input type="text" name="orientation_4" placeholder="Your reason for taking this assessment" required>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary mt-4">Submit Assessment</button>
+        <!-- Section 2 -->
+        <div class="section-box">
+          <h5 class="section-title">Emotional Well-Being</h5>
+          
+          <div class="question-item">
+            <label><span class="num">1.</span> Describe your mood right now</label>
+            <input type="text" name="emotions_0" placeholder="How are you feeling?" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">2.</span> Most common feelings this week</label>
+            <input type="text" name="emotions_1" placeholder="Your feelings this week" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">3.</span> Something worrying or upsetting you</label>
+            <input type="text" name="emotions_2" placeholder="Share if comfortable" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">4.</span> When do you feel calm or anxious?</label>
+            <input type="text" name="emotions_3" placeholder="Describe the situations" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">5.</span> Do you feel supported?</label>
+            <input type="text" name="emotions_4" placeholder="Your support system" required>
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section-box">
+          <h5 class="section-title">Memory and Concentration</h5>
+          
+          <div class="question-item">
+            <label><span class="num">1.</span> Repeat: Leaf – Phone – Chair</label>
+            <input type="text" name="memory_initial" placeholder="Type the three words" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">2.</span> Recall the three words after 5 minutes</label>
+            <input type="text" name="memory_recall" placeholder="Enter the words you remember" required>
+          </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section-box">
+          <h5 class="section-title">Thought and Perception</h5>
+          
+          <div class="question-item">
+            <label><span class="num">1.</span> Disturbing or hard-to-control thoughts?</label>
+            <input type="text" name="thoughts_0" placeholder="Describe if any" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">2.</span> Feeling others are against you?</label>
+            <input type="text" name="thoughts_1" placeholder="Your thoughts" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">3.</span> Hearing or seeing things others don't?</label>
+            <input type="text" name="thoughts_2" placeholder="Describe your experience" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">4.</span> Feeling disconnected from others?</label>
+            <input type="text" name="thoughts_3" placeholder="How do you feel?" required>
+          </div>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="section-box">
+          <h5 class="section-title">Decision-Making and Insight</h5>
+          
+          <div class="question-item">
+            <label><span class="num">1.</span> How would you help a crying friend?</label>
+            <input type="text" name="decisions_0" placeholder="Your approach" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">2.</span> What does mental health care mean to you?</label>
+            <input type="text" name="decisions_1" placeholder="Your thoughts" required>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">3.</span> Are you ready to make changes?</label>
+            <input type="text" name="decisions_2" placeholder="Your readiness" required>
+          </div>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="section-box">
+          <h5 class="section-title">Core Assessment</h5>
+          
+          <div class="question-item">
+            <label><span class="num">1.</span> How often have you felt anxious this week?</label>
+            <select name="q1" required>
+              <option value="" disabled selected>Select an option</option>
+              <option value="0">Not at all</option>
+              <option value="1">Several days</option>
+              <option value="2">More than half the days</option>
+              <option value="3">Nearly every day</option>
+            </select>
+          </div>
+
+          <div class="question-item">
+            <label><span class="num">2.</span> How often have you felt down or depressed?</label>
+            <select name="q2" required>
+              <option value="" disabled selected>Select an option</option>
+              <option value="0">Not at all</option>
+              <option value="1">Several days</option>
+              <option value="2">More than half the days</option>
+              <option value="3">Nearly every day</option>
+            </select>
+          </div>
+
+          <!-- Submit -->
+          <div class="submit-area">
+            <button type="submit" class="btn-submit">Submit Assessment</button>
+          </div>
+        </div>
+
       </form>
+
     </div>
   </div>
 
-  <!-- ✅ Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    const toggleBtn = document.getElementById('themeToggle');
-    const icon = document.getElementById('themeIcon');
-    const label = document.getElementById('themeLabel');
-
-    const prefersDark = localStorage.getItem('dark-mode') === 'true';
-    if (prefersDark) {
-      document.body.classList.add('dark-mode');
-      icon.textContent = '🌙';
-      label.textContent = 'Dark Mode';
-    }
-
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('dark-mode', isDark);
-      icon.textContent = isDark ? '🌙' : '🌞';
-      label.textContent = isDark ? 'Dark Mode' : 'Light Mode';
-    });
-  </script>
 </body>
 </html>

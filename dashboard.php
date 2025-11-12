@@ -191,6 +191,7 @@ $recommendations = [
     /* Header Section */
     .dashboard-header {
       margin-bottom: 2rem;
+      margin-top: 7rem;
     }
 
     .dashboard-header h1 {
@@ -545,8 +546,6 @@ $recommendations = [
               </div>
             </div>
           <?php endforeach; ?>
-        <?php else: ?>
-          <div class="alert alert-info">No upcoming appointments. <a href="book_appointment.php">Book one now</a>.</div>
         <?php endif; ?>
       </div>
     </div>
