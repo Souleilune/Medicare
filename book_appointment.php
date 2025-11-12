@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 $availability = [
   8 => [ // Dr. Santos

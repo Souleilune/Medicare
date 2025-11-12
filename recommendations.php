@@ -1,10 +1,19 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 $user_id = $_SESSION['user']['id'];
-$result = $conn->query("SELECT summary FROM assessments WHERE user_id = $user_id ORDER BY created_at DESC LIMIT 1");
-$assessment = $result->fetch_assoc();
+
+// Get the latest assessment
+$assessments = supabaseSelect(
+  'assessments',
+  ['user_id' => $user_id],
+  '*',
+  'created_at.desc',
+  1
+);
+
+$assessment = !empty($assessments) ? $assessments[0] : null;
 ?>
 
 <!DOCTYPE html>
@@ -63,7 +72,13 @@ $assessment = $result->fetch_assoc();
     <div class="container py-5 fade-in">
       <div class="recommendation-section mx-auto" style="max-width: 600px;">
         <h3 class="mb-3">Your Recommendations</h3>
-        <p class="text-muted">Based on your latest assessment: <strong><?= htmlspecialchars($assessment['summary']) ?></strong></p>
+        <?php if ($assessment): ?>
+          <p class="text-muted">Based on your latest assessment: <strong><?= htmlspecialchars($assessment['summary']) ?></strong></p>
+        <?php else: ?>
+          <div class="alert alert-info">
+            You haven't taken an assessment yet. <a href="assessment.php">Take one now</a> to get personalized recommendations.
+          </div>
+        <?php endif; ?>
 
         <div class="card mb-4">
           <div class="card-body">

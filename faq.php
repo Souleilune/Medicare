@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';  
+include 'supabase.php';
 $user_name = $_SESSION['user']['name'] ?? 'Guest';  
 ?>
 

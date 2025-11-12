@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include 'supabase.php';
 
 $fullname = "Test User";
 $email = "test@example.com";

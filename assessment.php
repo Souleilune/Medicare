@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 // ✅ Prevent undefined session error
 $user_id = $_SESSION['user']['id'] ?? '';

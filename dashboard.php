@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) header("Location: login.php");
-include 'db.php';
+include 'supabase.php';
 
 $user = $_SESSION['user'];
 $user_id = $user['id'];

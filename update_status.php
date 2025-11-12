@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 // Restrict access to Admin or Specialist
 if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['Admin', 'Specialist'])) {
@@ -17,9 +17,13 @@ if (!in_array($status, $valid_statuses)) {
   exit;
 }
 
-$stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE id = ?");
-$stmt->bind_param("si", $status, $appointment_id);
-$stmt->execute();
+$result = supabaseUpdate('appointments', ['id' => $appointment_id], [
+  'status' => $status
+]);
 
-echo "<script>alert('Status updated successfully.'); window.location.href='admin_appointments.php';</script>";
+if (isset($result['error'])) {
+  echo "<script>alert('Failed to update status.'); window.history.back();</script>";
+} else {
+  echo "<script>alert('Status updated successfully.'); window.location.href='admin_appointments.php';</script>";
+}
 exit;

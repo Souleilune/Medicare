@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 $user_id = $_POST['user_id'];
 $q1 = (int)$_POST['q1'];
@@ -17,18 +17,20 @@ if ($score <= 2) {
 }
 
 // Save to database
-$stmt = $conn->prepare("INSERT INTO assessments (user_id, score, summary) VALUES (?, ?, ?)");
-$stmt->bind_param("iis", $user_id, $score, $summary);
-$success = $stmt->execute();
+$result = supabaseInsert('assessments', [
+  'user_id' => $user_id,
+  'score' => $score,
+  'summary' => $summary
+]);
 
 // Add notification
-if ($success) {
+if (!isset($result['error'])) {
   $message = "Your new mental health assessment has been submitted.";
-  $notify = $conn->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
-  $notify->bind_param("is", $user_id, $message);
-  $notify->execute();
+  supabaseInsert('notifications', [
+    'user_id' => $user_id,
+    'message' => $message
+  ]);
 }
 
 header("Location: recommendations.php");
 exit;
-?>

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 // Restrict access to admins only
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'Admin') {

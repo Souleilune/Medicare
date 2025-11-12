@@ -1,16 +1,16 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 $user_id = $_SESSION['user']['id'];
 
-$result = $conn->query("
-  SELECT a.id, a.appointment_date, a.appointment_time, a.status, u.fullname AS specialist_name
-  FROM appointments a
-  JOIN users u ON a.specialist_id = u.id
-  WHERE a.user_id = $user_id
-  ORDER BY a.appointment_date ASC
-");
+// Get appointments with specialist information using Supabase foreign key syntax
+$appointments = supabaseSelect(
+  'appointments',
+  ['user_id' => $user_id],
+  'id,appointment_date,appointment_time,status,users:specialist_id(fullname)',
+  'appointment_date.asc'
+);
 ?>
 
 <!DOCTYPE html>
@@ -75,7 +75,7 @@ $result = $conn->query("
         </div>
       <?php endif; ?>
 
-      <?php if ($result->num_rows > 0): ?>
+      <?php if (count($appointments) > 0): ?>
         <table class="table table-bordered">
           <thead class="table-light">
             <tr>
@@ -87,11 +87,11 @@ $result = $conn->query("
             </tr>
           </thead>
           <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php foreach ($appointments as $row): ?>
               <tr>
                 <td><?= date('M d, Y', strtotime($row['appointment_date'])) ?></td>
                 <td><?= date('g:i A', strtotime($row['appointment_time'])) ?></td>
-                <td><?= htmlspecialchars($row['specialist_name']) ?></td>
+                <td><?= htmlspecialchars($row['users']['fullname'] ?? 'N/A') ?></td>
                 <td><span class="badge bg-info"><?= $row['status'] ?></span></td>
                 <td class="d-flex gap-2">
                   <form method="POST" action="delete_appointment.php" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
@@ -104,7 +104,7 @@ $result = $conn->query("
                   </form>
                 </td>
               </tr>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
           </tbody>
         </table>
       <?php else: ?>

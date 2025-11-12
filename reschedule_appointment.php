@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 $appointment_id = $_GET['appointment_id'] ?? null;
 

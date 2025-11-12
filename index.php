@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 if (!isset($_SESSION['user'])) {
   header("Location: login.php");
@@ -10,25 +10,44 @@ if (!isset($_SESSION['user'])) {
 $user_id = $_SESSION['user']['id'];
 $user_name = $_SESSION['user']['fullname'];
 
-$assessment = $conn->query("SELECT summary FROM assessments WHERE user_id = $user_id ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+// Get latest assessment
+$assessments = supabaseSelect(
+  'assessments',
+  ['user_id' => $user_id],
+  'summary',
+  'created_at.desc',
+  1
+);
+$assessment = !empty($assessments) ? $assessments[0] : null;
 
-$appointment = $conn->query("
-  SELECT id, appointment_date, appointment_time, specialist_id, status 
-  FROM appointments 
-  WHERE user_id = $user_id 
-    AND status IN ('Confirmed', 'Pending') 
-    AND appointment_date >= CURDATE()
-  ORDER BY appointment_date ASC 
-  LIMIT 1
-")->fetch_assoc();
+// Get upcoming appointment
+$appointments = supabaseSelect(
+  'appointments',
+  [
+    'user_id' => $user_id,
+    'status' => ['operator' => 'in', 'value' => '("Confirmed","Pending")'],
+    'appointment_date' => ['operator' => 'gte', 'value' => date('Y-m-d')]
+  ],
+  'id,appointment_date,appointment_time,specialist_id,status,users:specialist_id(fullname)',
+  'appointment_date.asc',
+  1
+);
+$appointment = !empty($appointments) ? $appointments[0] : null;
 
-$notifications = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id AND is_read = 0 ORDER BY created_at DESC")->fetch_all(MYSQLI_ASSOC);
+// Get unread notifications
+$notifications = supabaseSelect(
+  'notifications',
+  [
+    'user_id' => $user_id,
+    'is_read' => false
+  ],
+  '*',
+  'created_at.desc'
+);
 
 $specialist_name = '';
-if ($appointment) {
-  $sid = $appointment['specialist_id'];
-  $specialist = $conn->query("SELECT fullname FROM users WHERE id = $sid")->fetch_assoc();
-  $specialist_name = $specialist['fullname'];
+if ($appointment && isset($appointment['users'])) {
+  $specialist_name = $appointment['users']['fullname'] ?? '';
 }
 ?>
 <!DOCTYPE html>
@@ -221,7 +240,7 @@ if ($appointment) {
               <?= htmlspecialchars($specialist_name) ?> (Specialist)<br>
               <span class="badge bg-secondary"><?= $appointment['status'] ?></span>
             </p>
-                        <div class="d-flex gap-2">
+            <div class="d-flex gap-2">
               <form method="POST" action="cancel_appointment.php">
                 <input type="hidden" name="appointment_id" value="<?= $appointment['id'] ?>">
                 <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>

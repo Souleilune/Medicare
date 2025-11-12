@@ -13,12 +13,12 @@ if (isset($_SESSION['user']))
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="login-page">
-  <div class="container-fluid">
+   <div class="container-fluid p-0">
     <div class="row g-0 min-vh-100">
 
       <!-- Left Side: Logo + Pre-Assessment -->
       <div class="col-md-6 info-side">
-        <img src="images/Mindcare.png" alt="MindCare Logo" class="img-fluid" style="height: 400px;" />
+        <!-- <img src="images/Mindcare.png" alt="MindCare Logo" class="img-fluid" style="height: 400px;" /> -->
         <p class="text-muted text-center fst-italic">Where healing meets understanding.</p>
         <p>Take a Quick Pre-Assessment</p>
         <a href="pre_assessment.php" class="btn btn-outline-primary">Start Here</a>
@@ -27,7 +27,8 @@ if (isset($_SESSION['user']))
       <!-- Right Side: Login Form -->
       <div class="col-md-6 login-form-side">
         <div class="login-container fade-in text-center">
-          <h3 class="mb-4">Welcome!</h3>
+          <h3 class="mb-1 fw-bold text-start to left-align">Hello Again!</h3>
+          <small class="text-muted d-block mb-4 text-start to left-align">Welcome Back</small>
           <?php if (isset($_GET['error'])): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
           <?php endif; ?>
@@ -44,8 +45,8 @@ if (isset($_SESSION['user']))
           <div class="mt-3">
             <a href="forgot-password.php">Forgot Password?</a>
             <div class="mt-2">
-              <span>No account yet?</span>
-              <a href="register.php" class="text-primary fw-semibold">Sign up!</a>
+              <small>No account yet?</small>
+              <a href="register.php" class="text-primary fw-semibold small">Sign up!</a>
             </div>
           </div>
         </div>

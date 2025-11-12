@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
-include 'db.php';
+include 'supabase.php';
 
 $fullname = trim($_POST['fullname']);
 $email = trim($_POST['email']);
@@ -10,12 +10,9 @@ $password = $_POST['password'];
 $gender = $_POST['gender']; 
 
 // Check if email already exists
-$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$stmt->store_result();
+$existingUsers = supabaseSelect('users', ['email' => $email]);
 
-if ($stmt->num_rows > 0) {
+if (!empty($existingUsers)) {
   header("Location: register.php?error=Email already registered");
   exit;
 }
@@ -24,12 +21,17 @@ if ($stmt->num_rows > 0) {
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
 // Insert new user with gender
-$stmt = $conn->prepare("INSERT INTO users (fullname, email, password, gender) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("ssss", $fullname, $email, $hashed_password, $gender);
+$result = supabaseInsert('users', [
+  'fullname' => $fullname,
+  'email' => $email,
+  'password' => $hashed_password,
+  'gender' => $gender,
+  'role' => 'Patient' // Default role
+]);
 
-if ($stmt->execute()) {
-  header("Location: register.php?success=1");
-} else {
+if (isset($result['error'])) {
   header("Location: register.php?error=Registration failed");
+} else {
+  header("Location: register.php?success=1");
 }
 exit;

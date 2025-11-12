@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $user_id = $_POST['user_id'] ?? '';

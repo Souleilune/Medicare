@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php';
+include 'supabase.php';
 
 $score = isset($_GET['score']) ? (int)$_GET['score'] : null;
 

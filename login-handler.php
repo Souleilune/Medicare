@@ -2,22 +2,20 @@
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
-include 'db.php';
+include 'supabase.php';
 
 $email = $_POST['email'];
 $password = $_POST['password'];
 
-$stmt = $conn->prepare("SELECT id, fullname, email, password, gender, role, created_at FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
+// Get user by email
+$users = supabaseSelect('users', ['email' => $email]);
 
-if ($result->num_rows === 0) {
+if (empty($users)) {
   header("Location: login.php?error=Email not found");
   exit;
 }
 
-$user = $result->fetch_assoc();
+$user = $users[0];
 
 if (!password_verify($password, $user['password'])) {
   header("Location: login.php?error=Incorrect password");
