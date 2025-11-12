@@ -16,11 +16,12 @@ if (empty($email) || empty($password)) {
 // Debug: Log the email being searched
 error_log("Login attempt for email: " . $email);
 
-// Get user by email using Supabase REST API
-$users = supabaseSelect('users', ['email' => $email]);
+// Get user by email using Supabase REST API with RLS bypass
+// We need to bypass RLS here because we're not authenticated yet
+$users = supabaseSelect('users', ['email' => $email], '*', null, null, true);
 
 // Debug: Log the response
-error_log("Supabase response: " . json_encode($users));
+error_log("Supabase response count: " . count($users));
 
 if (empty($users)) {
   error_log("No user found for email: " . $email);

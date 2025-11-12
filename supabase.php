@@ -23,9 +23,15 @@ if (empty(SUPABASE_URL) || empty(SUPABASE_KEY)) {
 }
 
 /**
- * Enhanced Select with better error handling
+ * Enhanced Select with RLS bypass capability
+ * @param string $table Table name
+ * @param array $filters Filters to apply
+ * @param string $select Columns to select
+ * @param string|null $order Order clause
+ * @param int|null $limit Limit results
+ * @param bool $bypassRLS Use SERVICE_KEY to bypass RLS (for login/auth)
  */
-function supabaseSelect($table, $filters = [], $select = '*', $order = null, $limit = null) {
+function supabaseSelect($table, $filters = [], $select = '*', $order = null, $limit = null, $bypassRLS = false) {
     $url = SUPABASE_URL . '/rest/v1/' . $table . '?select=' . urlencode($select);
     
     // Add filters
@@ -48,9 +54,12 @@ function supabaseSelect($table, $filters = [], $select = '*', $order = null, $li
         $url .= '&limit=' . $limit;
     }
     
+    // Use SERVICE_KEY to bypass RLS if needed (for authentication queries)
+    $authKey = ($bypassRLS && !empty(SUPABASE_SERVICE_KEY)) ? SUPABASE_SERVICE_KEY : SUPABASE_KEY;
+    
     $headers = [
         'apikey: ' . SUPABASE_KEY,
-        'Authorization: Bearer ' . SUPABASE_KEY,
+        'Authorization: Bearer ' . $authKey,
         'Content-Type: application/json'
     ];
     
@@ -68,10 +77,12 @@ function supabaseSelect($table, $filters = [], $select = '*', $order = null, $li
     // Debug logging (remove in production)
     if ($httpCode >= 400) {
         error_log("=== SUPABASE SELECT ERROR ===");
+        error_log("Table: " . $table);
         error_log("URL: " . $url);
         error_log("HTTP Code: " . $httpCode);
         error_log("Response: " . $response);
         error_log("cURL Error: " . $curlError);
+        error_log("Using RLS Bypass: " . ($bypassRLS ? 'YES' : 'NO'));
         return [];
     }
     
@@ -86,13 +97,16 @@ function supabaseSelect($table, $filters = [], $select = '*', $order = null, $li
 
 /**
  * Insert data into Supabase
+ * Uses SERVICE_KEY by default to bypass RLS for system operations
  */
-function supabaseInsert($table, $data) {
+function supabaseInsert($table, $data, $bypassRLS = true) {
     $url = SUPABASE_URL . '/rest/v1/' . $table;
+    
+    $authKey = ($bypassRLS && !empty(SUPABASE_SERVICE_KEY)) ? SUPABASE_SERVICE_KEY : SUPABASE_KEY;
     
     $headers = [
         'apikey: ' . SUPABASE_KEY,
-        'Authorization: Bearer ' . SUPABASE_KEY,
+        'Authorization: Bearer ' . $authKey,
         'Content-Type: application/json',
         'Prefer: return=representation'
     ];
@@ -110,7 +124,7 @@ function supabaseInsert($table, $data) {
     curl_close($ch);
     
     if ($httpCode >= 400) {
-        error_log("Supabase Insert Error: " . $response);
+        error_log("Supabase Insert Error on table '$table': " . $response);
         return ['error' => true, 'message' => 'Insert failed', 'details' => $response];
     }
     
@@ -119,8 +133,9 @@ function supabaseInsert($table, $data) {
 
 /**
  * Update data in Supabase
+ * Uses SERVICE_KEY by default to bypass RLS for system operations
  */
-function supabaseUpdate($table, $filters, $data) {
+function supabaseUpdate($table, $filters, $data, $bypassRLS = true) {
     $url = SUPABASE_URL . '/rest/v1/' . $table;
     
     // Add filters
@@ -135,9 +150,11 @@ function supabaseUpdate($table, $filters, $data) {
     }
     $url .= '?' . implode('&', $queryParams);
     
+    $authKey = ($bypassRLS && !empty(SUPABASE_SERVICE_KEY)) ? SUPABASE_SERVICE_KEY : SUPABASE_KEY;
+    
     $headers = [
         'apikey: ' . SUPABASE_KEY,
-        'Authorization: Bearer ' . SUPABASE_KEY,
+        'Authorization: Bearer ' . $authKey,
         'Content-Type: application/json',
         'Prefer: return=representation'
     ];
@@ -155,7 +172,7 @@ function supabaseUpdate($table, $filters, $data) {
     curl_close($ch);
     
     if ($httpCode >= 400) {
-        error_log("Supabase Update Error: " . $response);
+        error_log("Supabase Update Error on table '$table': " . $response);
         return ['error' => true, 'message' => 'Update failed'];
     }
     
@@ -164,8 +181,9 @@ function supabaseUpdate($table, $filters, $data) {
 
 /**
  * Delete data from Supabase
+ * Uses SERVICE_KEY by default to bypass RLS for system operations
  */
-function supabaseDelete($table, $filters) {
+function supabaseDelete($table, $filters, $bypassRLS = true) {
     $url = SUPABASE_URL . '/rest/v1/' . $table;
     
     // Add filters
@@ -180,9 +198,11 @@ function supabaseDelete($table, $filters) {
     }
     $url .= '?' . implode('&', $queryParams);
     
+    $authKey = ($bypassRLS && !empty(SUPABASE_SERVICE_KEY)) ? SUPABASE_SERVICE_KEY : SUPABASE_KEY;
+    
     $headers = [
         'apikey: ' . SUPABASE_KEY,
-        'Authorization: Bearer ' . SUPABASE_KEY,
+        'Authorization: Bearer ' . $authKey,
         'Content-Type: application/json'
     ];
     
@@ -231,5 +251,3 @@ function supabaseRPC($functionName, $params = []) {
     
     return json_decode($response, true) ?: [];
 }
-
-// DO NOT CREATE MOCK $conn OBJECT - Remove all legacy MySQL code
